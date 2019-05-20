@@ -3,15 +3,43 @@ const { GraphQLServer } = require("graphql-yoga");
 const typeDefs = ` 
 type Query { 
     info: String!
+    feed: [Link!]!
+}
+
+type Link {
+  id: ID!
+  description: String!
+  url: String!
 }
 `;
-//2
+//1
+let links = [
+  {
+    id: "link-0",
+    url: "wwww.howtographql.com",
+    description: "Fullstack tutuorial for GraphQL"
+  }
+];
 
 const resolvers = {
   Query: {
-    info: () => null
+    info: () => "This is the API of a Hackernews Clone",
+    //2
+    feed: () => links
+  },
+  //3
+  Link: {
+    id: parent => parent.id,
+    description: parent => parent.description,
+    url: parent => parent.url
   }
 };
+
+// const resolvers = {
+//   Query: {
+//     info: () => null
+//   }
+// };
 // const resolvers = {
 //   Query: {
 //     info: () => "This is the API of a Hackernews Clone "
