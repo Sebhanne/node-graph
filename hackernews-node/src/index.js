@@ -1,72 +1,39 @@
-const { GraphQLServer } = require("graphql-yoga");
-// // 1
-const typeDefs = ` 
- type Query { 
-    info: String!
-    feed: [Link!]!
- }
+// "use strict";
+// Object.defineProperty(exports, "__esModule", { value: true });
+// var prisma_lib_1 = require("prisma-client-lib");
+// var typeDefs = require("./prisma-schema").typeDefs;
 
-type Mutation {
-   post(url: String!, description: String!): Link!
-}
-
-type Link {
-  id: ID!
-  description: String!
-  url: String!
-}
-`;mk
-//1
-let links = [
-  {
-    id: "link-0",
-    url: "wwww.howtographql.com",
-    description: "Fullstack tutuorial for GraphQL"
-  }
-];
-// 1
-let idCount = links.length;
-
+// var models = [
+//   {
+//     name: "User",
+//     embedded: false
+//   }
+// ];
+// exports.Prisma = prisma_lib_1.makePrismaClientClass({
+//   typeDefs,
+//   models,
+//   endpoint: `https://eu1.prisma.sh/ijelynsaele/hackernews-node/dev`
+// });
+// exports.prisma = new exports.Prisma();
+const { prisma } = require("./generated/prisma-client");
 const resolvers = {
   Query: {
-    info: () => "This is the API of a Hackernews Clone",
-    feed: () => links
+    info: () => `This is the API of a Hackernews Clone`,
+    feed: (root, args, context, info) => {
+      return context.prisma.links();
+    }
   },
   Mutation: {
-    //2
-    post: (parent, args) => {
-      const link = {
-        id: `link-${idCount++}`,
-        description: args.description,
-        url: args.url
-      };
-      links.push(link);
-      return link;
+    post: (root, args, context) => {
+      return context.prisma.createLink({
+        url: args.url,
+        description: args.description
+      });
     }
   }
 };
-//   //3
-//   Link: {
-//     id: parent => parent.id,
-//     description: parent => parent.description,
-//     url: parent => parent.url
-//   }
-// };
-
-// const resolvers = {
-//   Query: {
-//     info: () => null
-//   }
-// };
-// const resolvers = {
-//   Query: {
-//     info: () => "This is the API of a Hackernews Clone "
-//   }
-// };
-//3
-const server = new GraphQLServer({
+const server = new GrapQLServer({
   typeDefs: "./src/schema.graphql",
-  resolvers
+  resolvers,
+  context: { prisma }
 });
-
-server.start(() => console.log("Server is running on http://localhost:4000"));
